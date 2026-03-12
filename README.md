@@ -1,55 +1,14 @@
 # Arbiter
 
-Deterministic OHLCV ingest, DuckDB/Parquet store, and daily backtester.
+Arbiter is a deterministic pipeline for ingesting OHLCV data, storing it in a queryable Parquet layout, and running single-asset daily backtests with configurable fees and slippage.
 
-## Setup
+**What it does**
 
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-```
+- **Ingest** — You feed it CSV OHLCV. It normalizes to a canonical schema in UTC, deduplicates by timestamp, and writes partitioned Parquet so you can query by symbol and date range.
+- **Store** — Data lives under a simple partition structure: symbol, timeframe (e.g. 1d), then year and month. DuckDB can read these Parquet files directly for fast, SQL-style queries.
+- **Backtest** — Single-asset, daily bars only. Market orders are filled at the next bar’s open (no lookahead). You can set fees and slippage in basis points. Outputs standard metrics: final equity, CAGR, max drawdown, and Sharpe ratio.
+- **API** — A small FastAPI app exposes OHLCV query by symbol and date range, and a backtest endpoint that accepts symbol, timeframe, strategy, and cost parameters and returns the same metrics as JSON.
 
-## CLI (vertical slice)
+**What you get**
 
-### Ingest
-
-Load a CSV into partitioned Parquet. Prints `rows_ingested` and `rows_written`.
-
-```bash
-python -m arbiter.cli ingest --symbol TEST --timeframe 1d --csv tests/fixtures/sample_ohlcv.csv --out data/
-```
-
-**Expected output:** `rows_ingested=<N> rows_written=<N>`
-
-### Query
-
-Run DuckDB SQL (e.g. over Parquet). For a single-cell result (e.g. `SELECT count(*)`), prints `count = <value>`.
-
-```bash
-python -m arbiter.cli query --sql "SELECT count(*) FROM read_parquet('data/TEST/1d/**/*.parquet');"
-```
-
-**Expected output:** `count = <expected rowcount>`
-
-### Backtest
-
-Run backtest with buy-and-hold (and optional fees/slippage). Prints JSON with metrics.
-
-```bash
-python -m arbiter.cli backtest --symbol TEST --timeframe 1d --strategy buy_and_hold --fees_bps 10 --slippage_bps 5
-```
-
-**Expected output (JSON):** `equity_final`, `cagr`, `max_drawdown`, `sharpe`
-
-## API (FastAPI)
-
-Run with `uvicorn arbiter.api.main:app --reload`. Data directory is set via `ARBITER_DATA_DIR` (default: `data/`).
-
-- **GET /ohlcv?symbol=...&start=...&end=...** — OHLCV bars for symbol in date range (start/end optional, ISO dates).
-- **POST /backtest** — Body: `{ "symbol", "timeframe?", "strategy?", "fees_bps?", "slippage_bps?" }`. Returns `{ equity_final, cagr, max_drawdown, sharpe }`.
-
-## Directory layout
-
-- `arbiter/` — ingest, query, backtest, api
-- `data/` — partitioned Parquet (data/\<symbol\>/\<timeframe\>/year=YYYY/month=MM/)
-- `tests/` — tests and fixtures
+Deterministic behavior and clear execution rules: one canonical OHLCV schema, one fill rule (next open), and metrics computed from the same equity curve so results are reproducible. The codebase is organized into ingest, query, backtest, and API layers, with tests and fixtures so you can validate round-trips and backtest logic without large datasets.

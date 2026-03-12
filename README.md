@@ -1,14 +1,22 @@
 # Arbiter
 
-Arbiter is a deterministic pipeline for ingesting OHLCV data, storing it in a queryable Parquet layout, and running single-asset daily backtests with configurable fees and slippage.
+Deterministic OHLCV ingest, DuckDB/Parquet store, and daily backtester.
 
-**What it does**
+## Setup
 
-- **Ingest** — You feed it CSV OHLCV. It normalizes to a canonical schema in UTC, deduplicates by timestamp, and writes partitioned Parquet so you can query by symbol and date range.
-- **Store** — Data lives under a simple partition structure: symbol, timeframe (e.g. 1d), then year and month. DuckDB can read these Parquet files directly for fast, SQL-style queries.
-- **Backtest** — Single-asset, daily bars only. Market orders are filled at the next bar’s open (no lookahead). You can set fees and slippage in basis points. Outputs standard metrics: final equity, CAGR, max drawdown, and Sharpe ratio.
-- **API** — A small FastAPI app exposes OHLCV query by symbol and date range, and a backtest endpoint that accepts symbol, timeframe, strategy, and cost parameters and returns the same metrics as JSON.
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-**What you get**
+## CLI
 
-Deterministic behavior and clear execution rules: one canonical OHLCV schema, one fill rule (next open), and metrics computed from the same equity curve so results are reproducible. The codebase is organized into ingest, query, backtest, and API layers, with tests and fixtures so you can validate round-trips and backtest logic without large datasets.
+- **Ingest:** `python -m arbiter.cli ingest --symbol SYMBOL --timeframe 1d --csv PATH --out DATA_DIR`
+- **Query:** `python -m arbiter.cli query --sql "SELECT ... FROM read_parquet('data/SYMBOL/1d/**/*.parquet');"`
+- **Backtest:** `python -m arbiter.cli backtest --symbol SYMBOL --timeframe 1d --strategy buy_and_hold [--fees_bps N] [--slippage_bps N]`
+
+## Directory layout
+
+- `arbiter/` — ingest, query, backtest, api
+- `data/` — partitioned Parquet: `data/<symbol>/<timeframe>/year=YYYY/month=MM/*.parquet`
+- `tests/` — tests and fixtures

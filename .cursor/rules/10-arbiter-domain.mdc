@@ -1,0 +1,11 @@
+---
+description: Arbiter domain rules — OHLCV, storage, backtest
+globs:
+alwaysApply: true
+---
+
+# Arbiter domain
+
+- **OHLCV:** Canonical schema in UTC; columns `timestamp_utc`, `open`, `high`, `low`, `close`, `volume`.
+- **Partition path:** `data/<symbol>/<timeframe>/year=YYYY/month=MM/*.parquet`; timeframe fixed to `1d` for MVP.
+- **Backtest:** Market orders fill at **next bar open** (no lookahead). Metrics: CAGR, volatility, max drawdown, Sharpe.

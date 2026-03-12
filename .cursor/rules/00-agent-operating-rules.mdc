@@ -1,0 +1,11 @@
+---
+description: General agent rules for Arbiter
+globs: 
+alwaysApply: true
+---
+
+# Agent operating rules
+
+- Prefer type hints in Python.
+- Prefer deterministic behavior; avoid external APIs in core logic.
+- Run tests before committing: `pytest -q`.

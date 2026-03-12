@@ -1,6 +1,19 @@
 # Arbiter
 
-Deterministic OHLCV ingest, DuckDB/Parquet store, and daily backtester.
+Arbiter is a **deterministic market data + backtesting engine** that helps you **evaluate trading strategies without lying to yourself** (no lookahead, consistent timestamps, explicit fill rules, fees + slippage).
+
+It ingests OHLCV data, normalizes it into a canonical UTC schema, stores it as partitioned Parquet, queries via DuckDB, and produces equity curves + risk metrics from backtests.
+
+---
+
+## Demo (the "prove it works" section)
+
+### One command demo (after setup)
+```bash
+python -m arbiter.demo --symbol AAPL --timeframe 1d --strategy sma_cross
+```
+
+---
 
 ## Setup
 

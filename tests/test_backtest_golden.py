@@ -4,7 +4,6 @@ Golden backtest tests: deterministic equity for fixture, fees/slippage impact, n
 
 from pathlib import Path
 
-import pytest
 
 from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.backtest.engine import run_backtest_from_df

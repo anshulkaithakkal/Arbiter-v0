@@ -3,4 +3,6 @@ pandas
 pyarrow
 fastapi
 uvicorn[standard]
+httpx
 pytest
+ruff

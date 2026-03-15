@@ -33,3 +33,27 @@ def test_ingest_dedup(tmp_path):
     df = ingest_csv(dup_csv)
     assert len(df) == 1
     assert df["volume"].iloc[0] == 2000
+
+
+def test_ingest_missing_required_column_raises(tmp_path):
+    """CSV missing a required column (e.g. volume) should raise ValueError."""
+    bad_csv = tmp_path / "no_volume.csv"
+    bad_csv.write_text(
+        "timestamp_utc,open,high,low,close\n"
+        "2024-01-02 00:00:00+00:00,100,102,99,101\n"
+    )
+    with pytest.raises(ValueError, match="Missing required OHLCV columns"):
+        ingest_csv(bad_csv)
+
+
+def test_ingest_nan_ohlcv_rows_dropped(tmp_path):
+    """Rows with non-numeric OHLCV values should be dropped after coercion."""
+    bad_csv = tmp_path / "nan_rows.csv"
+    bad_csv.write_text(
+        "timestamp_utc,open,high,low,close,volume\n"
+        "2024-01-02 00:00:00+00:00,100,102,99,101,1000\n"
+        "2024-01-03 00:00:00+00:00,N/A,103,100,102,1100\n"
+    )
+    df = ingest_csv(bad_csv)
+    assert len(df) == 1
+    assert df["open"].iloc[0] == 100.0

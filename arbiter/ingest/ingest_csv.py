@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 from pathlib import Path
 
-from arbiter.ingest.schema import OHLCV_COLUMNS, validate_and_coerce
+from arbiter.ingest.schema import validate_and_coerce
 
 # Flexible input column name mapping (e.g. date -> timestamp_utc)
 COLUMN_ALIASES = {

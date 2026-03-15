@@ -64,3 +64,27 @@ def test_post_backtest_returns_metrics(client):
     assert "cagr" in data
     assert "max_drawdown" in data
     assert "sharpe" in data
+
+
+def test_post_backtest_unknown_strategy_returns_400(client):
+    """Unknown strategy name should return 400, not 500."""
+    r = client.post("/backtest", json={"symbol": "TEST", "strategy": "no_such_strategy"})
+    assert r.status_code == 400
+    assert "Unknown strategy" in r.json()["detail"]
+
+
+def test_post_backtest_missing_symbol_returns_400(client):
+    r = client.post("/backtest", json={"timeframe": "1d"})
+    assert r.status_code == 400
+
+
+def test_post_backtest_invalid_fees_returns_400(client):
+    r = client.post("/backtest", json={"symbol": "TEST", "fees_bps": "not_a_number"})
+    assert r.status_code == 400
+
+
+def test_get_ohlcv_with_timeframe_param(client):
+    """timeframe query param should be forwarded (not hardcoded to 1d)."""
+    r = client.get("/ohlcv", params={"symbol": "TEST", "timeframe": "1d"})
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)

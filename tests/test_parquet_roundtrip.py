@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import pytest
 
 from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.ingest.parquet_store import write_partitioned

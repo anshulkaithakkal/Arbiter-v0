@@ -25,12 +25,13 @@ def get_strategies():
 def get_ohlcv(
     request: Request,
     symbol: str,
+    timeframe: str = "1d",
     start: str | None = None,
     end: str | None = None,
 ):
-    """Return OHLCV bars for symbol in [start, end] (ISO date strings)."""
+    """Return OHLCV bars for symbol/timeframe in [start, end] (ISO date strings)."""
     data_dir = _get_data_dir(request)
-    df = load_ohlcv_parquet(data_dir, symbol, "1d")
+    df = load_ohlcv_parquet(data_dir, symbol, timeframe)
     if df.empty:
         return []
     if start is not None:
@@ -50,13 +51,21 @@ def post_backtest(request: Request, body: dict = Body(...)):
     symbol = body.get("symbol")
     if not symbol:
         raise HTTPException(status_code=400, detail="symbol required")
+    try:
+        fees_bps = float(body.get("fees_bps", 0))
+        slippage_bps = float(body.get("slippage_bps", 0))
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="fees_bps and slippage_bps must be numeric")
     data_dir = _get_data_dir(request)
-    result = run_backtest(
-        data_dir=data_dir,
-        symbol=symbol,
-        timeframe=str(body.get("timeframe", "1d")),
-        strategy=str(body.get("strategy", "buy_and_hold")),
-        fees_bps=float(body.get("fees_bps", 0)),
-        slippage_bps=float(body.get("slippage_bps", 0)),
-    )
+    try:
+        result = run_backtest(
+            data_dir=data_dir,
+            symbol=symbol,
+            timeframe=str(body.get("timeframe", "1d")),
+            strategy=str(body.get("strategy", "buy_and_hold")),
+            fees_bps=fees_bps,
+            slippage_bps=slippage_bps,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     return result

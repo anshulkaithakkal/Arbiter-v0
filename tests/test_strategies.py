@@ -15,7 +15,7 @@ from arbiter.backtest.strategies import (
     register,
     REGISTRY,
 )
-from arbiter.backtest.engine import run_backtest_from_df, _run_backtest_core
+from arbiter.backtest.engine import run_backtest_from_df
 
 
 # ---------------------------------------------------------------------------

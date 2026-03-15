@@ -9,7 +9,9 @@ def compute_cagr(equity_curve: pd.Series, initial_cash: float, trading_days: int
     """CAGR = (equity_final / initial_cash)^(252 / trading_days) - 1."""
     if initial_cash <= 0 or trading_days <= 0:
         return 0.0
-    equity_final = equity_curve.iloc[-1]
+    equity_final = float(equity_curve.iloc[-1])
+    if equity_final <= 0:
+        return -1.0  # total loss
     years = trading_days / 252.0
     if years <= 0:
         return 0.0

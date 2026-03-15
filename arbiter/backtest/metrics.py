@@ -34,14 +34,24 @@ def compute_sharpe(equity_curve: pd.Series, annualize: bool = True) -> float:
     return float(sharpe)
 
 
+def compute_volatility(equity_curve: pd.Series, annualize: bool = True) -> float:
+    """Annualized volatility = std(daily returns) * sqrt(252)."""
+    rets = equity_curve.pct_change().dropna()
+    if len(rets) < 2:
+        return 0.0
+    vol = float(rets.std())
+    return vol * (252 ** 0.5) if annualize else vol
+
+
 def compute_metrics(
     equity_curve: pd.Series,
     initial_cash: float,
     trading_days: int,
 ) -> dict[str, float]:
-    """Return dict with cagr, max_drawdown, sharpe (and optionally volatility)."""
+    """Return dict with cagr, volatility, max_drawdown, sharpe."""
     return {
         "cagr": compute_cagr(equity_curve, initial_cash, trading_days),
+        "volatility": compute_volatility(equity_curve),
         "max_drawdown": compute_max_drawdown(equity_curve),
         "sharpe": compute_sharpe(equity_curve),
     }

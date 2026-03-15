@@ -36,3 +36,13 @@ def shares_bought(cash: float, cost_per_share: float) -> float:
     if cost_per_share <= 0:
         return 0.0
     return cash / cost_per_share
+
+
+def proceeds_per_share_sell(
+    open_next_bar: float,
+    fees_bps: float = 0.0,
+    slippage_bps: float = 0.0,
+) -> float:
+    """Net proceeds per share for a sell fill at next bar open (after slippage and fees)."""
+    fill = fill_price_at_next_open(open_next_bar, "sell", slippage_bps)
+    return fill * (1 - fees_bps / 10_000)

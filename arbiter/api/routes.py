@@ -1,4 +1,4 @@
-"""API routes: GET /ohlcv, POST /backtest."""
+"""API routes: GET /ohlcv, GET /strategies, POST /backtest."""
 
 from __future__ import annotations
 
@@ -6,12 +6,19 @@ import pandas as pd
 from fastapi import APIRouter, Request, HTTPException, Body
 
 from arbiter.backtest.engine import load_ohlcv_parquet, run_backtest
+from arbiter.backtest.strategies import list_strategies
 
 router = APIRouter()
 
 
 def _get_data_dir(request: Request) -> str:
     return getattr(request.app.state, "data_dir", "data")
+
+
+@router.get("/strategies")
+def get_strategies():
+    """Return list of registered strategy names."""
+    return {"strategies": list_strategies()}
 
 
 @router.get("/ohlcv")

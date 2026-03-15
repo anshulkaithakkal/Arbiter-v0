@@ -11,6 +11,7 @@ from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.ingest.parquet_store import write_partitioned
 from arbiter.query.queries import run_sql
 from arbiter.backtest.engine import backtest_json
+from arbiter.backtest.strategies import list_strategies
 
 
 def cmd_ingest(args: argparse.Namespace) -> None:
@@ -62,14 +63,25 @@ def main() -> None:
     p_query.set_defaults(func=cmd_query)
 
     # backtest --symbol TEST --timeframe 1d --strategy buy_and_hold --fees_bps 10 --slippage_bps 5
+    available = list_strategies()
     p_backtest = subparsers.add_parser("backtest")
     p_backtest.add_argument("--symbol", required=True)
     p_backtest.add_argument("--timeframe", default="1d")
-    p_backtest.add_argument("--strategy", default="buy_and_hold")
+    p_backtest.add_argument(
+        "--strategy",
+        default="buy_and_hold",
+        choices=available,
+        metavar=f"{{{','.join(available)}}}",
+        help=f"Strategy to run. Available: {', '.join(available)}",
+    )
     p_backtest.add_argument("--fees_bps", default=10)
     p_backtest.add_argument("--slippage_bps", default=5)
     p_backtest.add_argument("--data-dir", default="data", dest="data_dir")
     p_backtest.set_defaults(func=cmd_backtest)
+
+    # strategies — list registered strategy names
+    p_strategies = subparsers.add_parser("strategies", help="List available strategies")
+    p_strategies.set_defaults(func=lambda _: print("\n".join(list_strategies())))
 
     args = parser.parse_args()
     args.func(args)

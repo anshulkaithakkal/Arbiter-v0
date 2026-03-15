@@ -14,7 +14,8 @@ FIXTURE_CSV = Path(__file__).resolve().parent / "fixtures" / "sample_ohlcv.csv"
 
 # Golden values for sample_ohlcv.csv with fees_bps=0, slippage_bps=0, initial_cash=1_000_000.
 # Buy at close of bar 0 -> fill at open of bar 1 = 101. position = 1e6/101, equity_final = position * 105.
-GOLDEN_EQUITY_FINAL = 1_039_543.96
+# Exact: round(1_000_000 / 101 * 105, 2) = 1_039_603.96
+GOLDEN_EQUITY_FINAL = 1_039_603.96
 # If we wrongly filled at bar 0 open (100) we would get 10000 * 105 = 1_050_000 (lookahead).
 LOOKAHEAD_EQUITY_IF_FILL_AT_BAR0 = 1_050_000.0
 

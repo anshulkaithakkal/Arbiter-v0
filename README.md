@@ -6,11 +6,11 @@ It ingests OHLCV data, normalizes it into a canonical UTC schema, stores it as p
 
 ---
 
-## Demo (the "prove it works" section)
+## Quick start (after setup)
 
-### One command demo (after setup)
 ```bash
-python -m arbiter.demo --symbol AAPL --timeframe 1d --strategy sma_cross
+python -m arbiter.cli ingest --symbol TEST --timeframe 1d --csv tests/fixtures/sample_ohlcv.csv --out data/
+python -m arbiter.cli backtest --symbol TEST --timeframe 1d --strategy sma_crossover_20_50
 ```
 
 ---

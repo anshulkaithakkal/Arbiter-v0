@@ -7,16 +7,15 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
+from arbiter.backtest.engine import run_backtest_from_df
 from arbiter.backtest.strategies import (
+    REGISTRY,
     buy_and_hold,
-    make_sma_crossover,
     get_strategy,
     list_strategies,
+    make_sma_crossover,
     register,
-    REGISTRY,
 )
-from arbiter.backtest.engine import run_backtest_from_df
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

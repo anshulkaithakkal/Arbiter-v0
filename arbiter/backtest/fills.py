@@ -5,6 +5,10 @@ from __future__ import annotations
 # Execution rule: order at close of bar T fills at open of bar T+1
 FILL_AT_NEXT_OPEN = "next_open"
 
+# Single source of truth for default costs (CLI, API and engine all use these).
+DEFAULT_FEES_BPS = 10.0
+DEFAULT_SLIPPAGE_BPS = 5.0
+
 
 def fill_price_at_next_open(
     open_next_bar: float,

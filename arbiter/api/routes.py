@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-import pandas as pd
-from fastapi import APIRouter, Request, HTTPException, Body
+from typing import Annotated
 
-from arbiter.backtest.engine import load_ohlcv_parquet, run_backtest
+import pandas as pd
+from fastapi import APIRouter, Body, HTTPException, Request
+
+from arbiter.backtest.engine import load_ohlcv_parquet, run_backtest_from_df
+from arbiter.backtest.fills import DEFAULT_FEES_BPS, DEFAULT_SLIPPAGE_BPS
 from arbiter.backtest.strategies import list_strategies
 
 router = APIRouter()
@@ -33,7 +36,7 @@ def get_ohlcv(
     data_dir = _get_data_dir(request)
     df = load_ohlcv_parquet(data_dir, symbol, timeframe)
     if df.empty:
-        return []
+        raise HTTPException(status_code=404, detail=f"no data for {symbol}/{timeframe}")
     if start is not None:
         start_d = pd.to_datetime(start, utc=True)
         df = df[df["timestamp_utc"] >= start_d]
@@ -46,22 +49,24 @@ def get_ohlcv(
 
 
 @router.post("/backtest")
-def post_backtest(request: Request, body: dict = Body(...)):
+def post_backtest(request: Request, body: Annotated[dict, Body()]):
     """Run backtest. Body: symbol, timeframe?, strategy?, fees_bps?, slippage_bps?."""
     symbol = body.get("symbol")
     if not symbol:
         raise HTTPException(status_code=400, detail="symbol required")
     try:
-        fees_bps = float(body.get("fees_bps", 0))
-        slippage_bps = float(body.get("slippage_bps", 0))
+        fees_bps = float(body.get("fees_bps", DEFAULT_FEES_BPS))
+        slippage_bps = float(body.get("slippage_bps", DEFAULT_SLIPPAGE_BPS))
     except (TypeError, ValueError):
         raise HTTPException(status_code=400, detail="fees_bps and slippage_bps must be numeric")
     data_dir = _get_data_dir(request)
+    timeframe = str(body.get("timeframe", "1d"))
+    df = load_ohlcv_parquet(data_dir, symbol, timeframe)
+    if df.empty:
+        raise HTTPException(status_code=404, detail=f"no data for {symbol}/{timeframe}")
     try:
-        result = run_backtest(
-            data_dir=data_dir,
-            symbol=symbol,
-            timeframe=str(body.get("timeframe", "1d")),
+        result = run_backtest_from_df(
+            df,
             strategy=str(body.get("strategy", "buy_and_hold")),
             fees_bps=fees_bps,
             slippage_bps=slippage_bps,

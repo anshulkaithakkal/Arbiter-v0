@@ -4,10 +4,8 @@ Golden backtest tests: deterministic equity for fixture, fees/slippage impact, n
 
 from pathlib import Path
 
-
-from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.backtest.engine import run_backtest_from_df
-
+from arbiter.ingest.ingest_csv import ingest_csv
 
 FIXTURE_CSV = Path(__file__).resolve().parent / "fixtures" / "sample_ohlcv.csv"
 

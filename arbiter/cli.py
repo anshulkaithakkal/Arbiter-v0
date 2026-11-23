@@ -5,11 +5,12 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from arbiter.backtest.engine import backtest_json
+from arbiter.backtest.fills import DEFAULT_FEES_BPS, DEFAULT_SLIPPAGE_BPS
+from arbiter.backtest.strategies import list_strategies
 from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.ingest.parquet_store import write_partitioned
 from arbiter.query.queries import run_sql
-from arbiter.backtest.engine import backtest_json
-from arbiter.backtest.strategies import list_strategies
 
 
 def cmd_ingest(args: argparse.Namespace) -> None:
@@ -72,8 +73,8 @@ def main() -> None:
         metavar=f"{{{','.join(available)}}}",
         help=f"Strategy to run. Available: {', '.join(available)}",
     )
-    p_backtest.add_argument("--fees_bps", default=10)
-    p_backtest.add_argument("--slippage_bps", default=5)
+    p_backtest.add_argument("--fees_bps", default=DEFAULT_FEES_BPS)
+    p_backtest.add_argument("--slippage_bps", default=DEFAULT_SLIPPAGE_BPS)
     p_backtest.add_argument("--data-dir", default="data", dest="data_dir")
     p_backtest.set_defaults(func=cmd_backtest)
 

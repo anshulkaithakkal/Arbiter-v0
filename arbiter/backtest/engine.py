@@ -9,18 +9,30 @@ looked up from the registry (or passed directly as a callable).
 from __future__ import annotations
 
 import json
-import duckdb
-import pandas as pd
 from pathlib import Path
 
-from arbiter.backtest.fills import cost_per_share_buy, shares_bought, proceeds_per_share_sell
+import duckdb
+import pandas as pd
+
+from arbiter.backtest.fills import (
+    DEFAULT_FEES_BPS,
+    DEFAULT_SLIPPAGE_BPS,
+    cost_per_share_buy,
+    proceeds_per_share_sell,
+    shares_bought,
+)
 from arbiter.backtest.metrics import compute_metrics
 from arbiter.backtest.strategies import StrategyFn, get_strategy
 
 
 def load_ohlcv_parquet(data_dir: str | Path, symbol: str, timeframe: str = "1d") -> pd.DataFrame:
-    """Load OHLCV from partitioned Parquet via DuckDB read_parquet."""
+    """Load OHLCV from partitioned Parquet via DuckDB read_parquet.
+
+    Returns an empty DataFrame when no Parquet files exist for the symbol/timeframe.
+    """
     base = Path(data_dir) / symbol / timeframe
+    if not base.is_dir() or next(base.rglob("*.parquet"), None) is None:
+        return pd.DataFrame()
     glob = str(base / "**" / "*.parquet")
     conn = duckdb.connect(":memory:")
     try:
@@ -102,8 +114,8 @@ def run_backtest(
     symbol: str,
     timeframe: str = "1d",
     strategy: str | StrategyFn = "buy_and_hold",
-    fees_bps: float = 0.0,
-    slippage_bps: float = 0.0,
+    fees_bps: float = DEFAULT_FEES_BPS,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
     initial_cash: float = 1_000_000.0,
 ) -> dict:
     """
@@ -134,8 +146,8 @@ def run_backtest(
 def run_backtest_from_df(
     df: pd.DataFrame,
     strategy: str | StrategyFn = "buy_and_hold",
-    fees_bps: float = 0.0,
-    slippage_bps: float = 0.0,
+    fees_bps: float = DEFAULT_FEES_BPS,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
     initial_cash: float = 1_000_000.0,
 ) -> dict:
     """
@@ -181,8 +193,8 @@ def backtest_json(
     symbol: str,
     timeframe: str = "1d",
     strategy: str | StrategyFn = "buy_and_hold",
-    fees_bps: float = 0.0,
-    slippage_bps: float = 0.0,
+    fees_bps: float = DEFAULT_FEES_BPS,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
 ) -> str:
     """Run backtest and return JSON string."""
     result = run_backtest(

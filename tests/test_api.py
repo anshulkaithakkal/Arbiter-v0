@@ -9,7 +9,6 @@ from arbiter.api.main import app
 from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.ingest.parquet_store import write_partitioned
 
-
 FIXTURE_CSV = Path(__file__).resolve().parent / "fixtures" / "sample_ohlcv.csv"
 
 
@@ -88,3 +87,29 @@ def test_get_ohlcv_with_timeframe_param(client):
     r = client.get("/ohlcv", params={"symbol": "TEST", "timeframe": "1d"})
     assert r.status_code == 200
     assert isinstance(r.json(), list)
+
+
+def test_backtest_defaults_match_across_entry_points(client):
+    """API omitting fees/slippage must equal the engine called with the shared defaults."""
+    from arbiter.backtest.engine import run_backtest
+    from arbiter.backtest.fills import DEFAULT_FEES_BPS, DEFAULT_SLIPPAGE_BPS
+
+    r = client.post("/backtest", json={"symbol": "TEST"})
+    expected = run_backtest(
+        app.state.data_dir,
+        "TEST",
+        fees_bps=DEFAULT_FEES_BPS,
+        slippage_bps=DEFAULT_SLIPPAGE_BPS,
+    )
+    assert r.status_code == 200
+    assert r.json() == expected
+
+
+def test_ohlcv_unknown_symbol_returns_404(client):
+    r = client.get("/ohlcv", params={"symbol": "NOPE"})
+    assert r.status_code == 404
+
+
+def test_backtest_unknown_symbol_returns_404(client):
+    r = client.post("/backtest", json={"symbol": "NOPE"})
+    assert r.status_code == 404

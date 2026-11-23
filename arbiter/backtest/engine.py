@@ -26,8 +26,13 @@ from arbiter.backtest.strategies import StrategyFn, get_strategy
 
 
 def load_ohlcv_parquet(data_dir: str | Path, symbol: str, timeframe: str = "1d") -> pd.DataFrame:
-    """Load OHLCV from partitioned Parquet via DuckDB read_parquet."""
+    """Load OHLCV from partitioned Parquet via DuckDB read_parquet.
+
+    Returns an empty DataFrame when no Parquet files exist for the symbol/timeframe.
+    """
     base = Path(data_dir) / symbol / timeframe
+    if not base.is_dir() or next(base.rglob("*.parquet"), None) is None:
+        return pd.DataFrame()
     glob = str(base / "**" / "*.parquet")
     conn = duckdb.connect(":memory:")
     try:

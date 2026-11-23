@@ -103,3 +103,13 @@ def test_backtest_defaults_match_across_entry_points(client):
     )
     assert r.status_code == 200
     assert r.json() == expected
+
+
+def test_ohlcv_unknown_symbol_returns_404(client):
+    r = client.get("/ohlcv", params={"symbol": "NOPE"})
+    assert r.status_code == 404
+
+
+def test_backtest_unknown_symbol_returns_404(client):
+    r = client.post("/backtest", json={"symbol": "NOPE"})
+    assert r.status_code == 404

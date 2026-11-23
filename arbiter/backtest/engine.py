@@ -15,6 +15,8 @@ import duckdb
 import pandas as pd
 
 from arbiter.backtest.fills import (
+    DEFAULT_FEES_BPS,
+    DEFAULT_SLIPPAGE_BPS,
     cost_per_share_buy,
     proceeds_per_share_sell,
     shares_bought,
@@ -107,8 +109,8 @@ def run_backtest(
     symbol: str,
     timeframe: str = "1d",
     strategy: str | StrategyFn = "buy_and_hold",
-    fees_bps: float = 0.0,
-    slippage_bps: float = 0.0,
+    fees_bps: float = DEFAULT_FEES_BPS,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
     initial_cash: float = 1_000_000.0,
 ) -> dict:
     """
@@ -139,8 +141,8 @@ def run_backtest(
 def run_backtest_from_df(
     df: pd.DataFrame,
     strategy: str | StrategyFn = "buy_and_hold",
-    fees_bps: float = 0.0,
-    slippage_bps: float = 0.0,
+    fees_bps: float = DEFAULT_FEES_BPS,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
     initial_cash: float = 1_000_000.0,
 ) -> dict:
     """
@@ -186,8 +188,8 @@ def backtest_json(
     symbol: str,
     timeframe: str = "1d",
     strategy: str | StrategyFn = "buy_and_hold",
-    fees_bps: float = 0.0,
-    slippage_bps: float = 0.0,
+    fees_bps: float = DEFAULT_FEES_BPS,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
 ) -> str:
     """Run backtest and return JSON string."""
     result = run_backtest(

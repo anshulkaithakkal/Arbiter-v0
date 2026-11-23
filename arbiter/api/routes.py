@@ -8,6 +8,7 @@ import pandas as pd
 from fastapi import APIRouter, Body, HTTPException, Request
 
 from arbiter.backtest.engine import load_ohlcv_parquet, run_backtest
+from arbiter.backtest.fills import DEFAULT_FEES_BPS, DEFAULT_SLIPPAGE_BPS
 from arbiter.backtest.strategies import list_strategies
 
 router = APIRouter()
@@ -54,8 +55,8 @@ def post_backtest(request: Request, body: Annotated[dict, Body()]):
     if not symbol:
         raise HTTPException(status_code=400, detail="symbol required")
     try:
-        fees_bps = float(body.get("fees_bps", 0))
-        slippage_bps = float(body.get("slippage_bps", 0))
+        fees_bps = float(body.get("fees_bps", DEFAULT_FEES_BPS))
+        slippage_bps = float(body.get("slippage_bps", DEFAULT_SLIPPAGE_BPS))
     except (TypeError, ValueError):
         raise HTTPException(status_code=400, detail="fees_bps and slippage_bps must be numeric")
     data_dir = _get_data_dir(request)

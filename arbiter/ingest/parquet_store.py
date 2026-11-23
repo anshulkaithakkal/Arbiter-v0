@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from arbiter.ingest.schema import validate_and_coerce
+
 
 def write_partitioned(
     df: pd.DataFrame,
@@ -16,6 +18,7 @@ def write_partitioned(
     """
     Write DataFrame to partitioned Parquet under base_path.
     Layout: base_path / symbol / timeframe / year=YYYY / month=MM / part.parquet
+    Existing month partitions are merged (dedup by timestamp, new rows win).
     Returns number of rows written.
     """
     if df.empty or "timestamp_utc" not in df.columns:
@@ -30,6 +33,9 @@ def write_partitioned(
         out_dir.mkdir(parents=True, exist_ok=True)
         out_file = out_dir / "data.parquet"
         subset = group.drop(columns=["year", "month"])
+        if out_file.exists():
+            # Merge with rows already stored so re-ingesting never drops data.
+            subset = validate_and_coerce(pd.concat([pd.read_parquet(out_file), subset]))
         subset.to_parquet(out_file, index=False)
         rows += len(subset)
     return rows

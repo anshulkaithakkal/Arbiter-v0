@@ -22,3 +22,14 @@ def test_parquet_roundtrip(tmp_path):
     assert len(out) == n_before
     for col in ["timestamp_utc", "open", "high", "low", "close", "volume"]:
         assert col in out.columns
+
+
+def test_write_partitioned_merges_existing_month(tmp_path):
+    """A second write into the same month keeps earlier rows and dedups overlaps."""
+    df = ingest_csv(FIXTURE_CSV)
+    first, second = df.iloc[:3], df.iloc[2:]  # one overlapping row
+    write_partitioned(first, tmp_path, SYMBOL, TIMEFRAME)
+    write_partitioned(second, tmp_path, SYMBOL, TIMEFRAME)
+    out = read_parquet(str(tmp_path / SYMBOL / TIMEFRAME / "**" / "*.parquet"))
+    assert len(out) == len(df)
+    assert out["timestamp_utc"].is_unique

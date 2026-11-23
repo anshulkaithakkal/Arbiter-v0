@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 import pandas as pd
-from fastapi import APIRouter, Request, HTTPException, Body
+from fastapi import APIRouter, Body, HTTPException, Request
 
 from arbiter.backtest.engine import load_ohlcv_parquet, run_backtest
 from arbiter.backtest.strategies import list_strategies
@@ -46,7 +48,7 @@ def get_ohlcv(
 
 
 @router.post("/backtest")
-def post_backtest(request: Request, body: dict = Body(...)):
+def post_backtest(request: Request, body: Annotated[dict, Body()]):
     """Run backtest. Body: symbol, timeframe?, strategy?, fees_bps?, slippage_bps?."""
     symbol = body.get("symbol")
     if not symbol:

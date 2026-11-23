@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-
 from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.ingest.parquet_store import write_partitioned
 from arbiter.query.duckdb_client import read_parquet

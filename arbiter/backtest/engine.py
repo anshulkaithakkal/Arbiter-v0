@@ -9,11 +9,16 @@ looked up from the registry (or passed directly as a callable).
 from __future__ import annotations
 
 import json
-import duckdb
-import pandas as pd
 from pathlib import Path
 
-from arbiter.backtest.fills import cost_per_share_buy, shares_bought, proceeds_per_share_sell
+import duckdb
+import pandas as pd
+
+from arbiter.backtest.fills import (
+    cost_per_share_buy,
+    proceeds_per_share_sell,
+    shares_bought,
+)
 from arbiter.backtest.metrics import compute_metrics
 from arbiter.backtest.strategies import StrategyFn, get_strategy
 

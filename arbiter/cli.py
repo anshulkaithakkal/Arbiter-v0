@@ -5,11 +5,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from arbiter.backtest.engine import backtest_json
+from arbiter.backtest.strategies import list_strategies
 from arbiter.ingest.ingest_csv import ingest_csv
 from arbiter.ingest.parquet_store import write_partitioned
 from arbiter.query.queries import run_sql
-from arbiter.backtest.engine import backtest_json
-from arbiter.backtest.strategies import list_strategies
 
 
 def cmd_ingest(args: argparse.Namespace) -> None:
